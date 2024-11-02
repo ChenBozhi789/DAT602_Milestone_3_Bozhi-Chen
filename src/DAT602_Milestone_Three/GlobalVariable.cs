@@ -8,7 +8,7 @@ namespace DAT602_MIlestone_Three
 {
     public static class GlobalVariable
     {
-        public static int UserID { get; set; }
+        public static int PlayerID { get; set; }
 
         public static int GameID { get; set; }
 

@@ -3,8 +3,20 @@
   "WorkspaceRootPath": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_MIlestone_Three\\DAT602_Milestone_Three.csproj|d:\\my_work\\dat602\\milestone_3\\dat602_milestone_3_bozhi-chen\\src\\dat602_milestone_three\\databaseaccessobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_MIlestone_Three\\DAT602_Milestone_Three.csproj|solutionrelative:dat602_milestone_three\\databaseaccessobject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|d:\\my_work\\dat602\\milestone_3\\dat602_milestone_3_bozhi-chen\\src\\dat602_milestone_three\\gameplayform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|solutionrelative:dat602_milestone_three\\gameplayform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|d:\\my_work\\dat602\\milestone_3\\dat602_milestone_3_bozhi-chen\\src\\dat602_milestone_three\\gameplayform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|solutionrelative:dat602_milestone_three\\gameplayform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|d:\\my_work\\dat602\\milestone_3\\dat602_milestone_3_bozhi-chen\\src\\dat602_milestone_three\\registrationform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|solutionrelative:dat602_milestone_three\\registrationform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|d:\\my_work\\dat602\\milestone_3\\dat602_milestone_3_bozhi-chen\\src\\dat602_milestone_three\\registrationform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{1A638C49-4910-41B3-B750-229368FD6439}|DAT602_Milestone_Three\\DAT602_Milestone_Three.csproj|solutionrelative:dat602_milestone_three\\registrationform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,15 +55,52 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "DatabaseAccessObject.cs",
-              "DocumentMoniker": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\DatabaseAccessObject.cs",
-              "RelativeDocumentMoniker": "DAT602_Milestone_Three\\DatabaseAccessObject.cs",
-              "ToolTip": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\DatabaseAccessObject.cs",
-              "RelativeToolTip": "DAT602_Milestone_Three\\DatabaseAccessObject.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAcAAAABAAAA",
+              "Title": "GamePlayForm.cs",
+              "DocumentMoniker": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\GamePlayForm.cs",
+              "RelativeDocumentMoniker": "DAT602_Milestone_Three\\GamePlayForm.cs",
+              "ToolTip": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\GamePlayForm.cs",
+              "RelativeToolTip": "DAT602_Milestone_Three\\GamePlayForm.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-27T04:35:27.754Z",
+              "WhenOpened": "2024-11-02T02:47:10.845Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GamePlayForm.cs [Design]",
+              "DocumentMoniker": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\GamePlayForm.cs",
+              "RelativeDocumentMoniker": "DAT602_Milestone_Three\\GamePlayForm.cs",
+              "ToolTip": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\GamePlayForm.cs [Design]",
+              "RelativeToolTip": "DAT602_Milestone_Three\\GamePlayForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-02T02:47:08.895Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RegistrationForm.cs",
+              "DocumentMoniker": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\RegistrationForm.cs",
+              "RelativeDocumentMoniker": "DAT602_Milestone_Three\\RegistrationForm.cs",
+              "ToolTip": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\RegistrationForm.cs",
+              "RelativeToolTip": "DAT602_Milestone_Three\\RegistrationForm.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAgAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-02T02:46:53.595Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "RegistrationForm.cs [Design]",
+              "DocumentMoniker": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\RegistrationForm.cs",
+              "RelativeDocumentMoniker": "DAT602_Milestone_Three\\RegistrationForm.cs",
+              "ToolTip": "D:\\my_work\\DAT602\\Milestone_3\\DAT602_Milestone_3_Bozhi-Chen\\src\\DAT602_Milestone_Three\\RegistrationForm.cs [Design]",
+              "RelativeToolTip": "DAT602_Milestone_Three\\RegistrationForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-11-02T02:46:04.096Z",
+              "EditorCaption": " [Design]"
             }
           ]
         },

@@ -189,7 +189,7 @@
             this.btnBackToPage.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
             this.btnBackToPage.Location = new System.Drawing.Point(538, 423);
             this.btnBackToPage.Name = "btnBackToPage";
-            this.btnBackToPage.Size = new System.Drawing.Size(212, 42);
+            this.btnBackToPage.Size = new System.Drawing.Size(315, 42);
             this.btnBackToPage.TabIndex = 19;
             this.btnBackToPage.Text = "Back To Prev Page";
             this.btnBackToPage.UseVisualStyleBackColor = true;
@@ -197,25 +197,25 @@
             // 
             // txtStartingTile
             // 
-            this.txtStartingTile.Location = new System.Drawing.Point(656, 340);
+            this.txtStartingTile.Location = new System.Drawing.Point(622, 343);
             this.txtStartingTile.Name = "txtStartingTile";
-            this.txtStartingTile.Size = new System.Drawing.Size(78, 25);
+            this.txtStartingTile.Size = new System.Drawing.Size(73, 25);
             this.txtStartingTile.TabIndex = 20;
             // 
             // txtTargetTile
             // 
-            this.txtTargetTile.Location = new System.Drawing.Point(656, 381);
+            this.txtTargetTile.Location = new System.Drawing.Point(780, 343);
             this.txtTargetTile.Name = "txtTargetTile";
-            this.txtTargetTile.Size = new System.Drawing.Size(80, 25);
+            this.txtTargetTile.Size = new System.Drawing.Size(73, 25);
             this.txtTargetTile.TabIndex = 21;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Calibri", 14F);
+            this.label6.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
             this.label6.Location = new System.Drawing.Point(541, 298);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(305, 29);
+            this.label6.Size = new System.Drawing.Size(309, 29);
             this.label6.TabIndex = 23;
             this.label6.Text = "Click button to move an item!";
             // 
@@ -223,30 +223,30 @@
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
-            this.label8.Location = new System.Drawing.Point(541, 381);
+            this.label8.Location = new System.Drawing.Point(713, 343);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(96, 24);
+            this.label8.Size = new System.Drawing.Size(61, 24);
             this.label8.TabIndex = 24;
-            this.label8.Text = "Target Tile";
+            this.label8.Text = "Target";
             // 
             // lblStartingTile
             // 
             this.lblStartingTile.AutoSize = true;
             this.lblStartingTile.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
-            this.lblStartingTile.Location = new System.Drawing.Point(541, 340);
+            this.lblStartingTile.Location = new System.Drawing.Point(541, 343);
             this.lblStartingTile.Name = "lblStartingTile";
-            this.lblStartingTile.Size = new System.Drawing.Size(110, 24);
+            this.lblStartingTile.Size = new System.Drawing.Size(75, 24);
             this.lblStartingTile.TabIndex = 25;
-            this.lblStartingTile.Text = "Starting Tile";
+            this.lblStartingTile.Text = "Starting";
             // 
             // btnMove
             // 
-            this.btnMove.Font = new System.Drawing.Font("Calibri", 12F);
-            this.btnMove.Location = new System.Drawing.Point(742, 355);
+            this.btnMove.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
+            this.btnMove.Location = new System.Drawing.Point(705, 382);
             this.btnMove.Name = "btnMove";
-            this.btnMove.Size = new System.Drawing.Size(91, 35);
+            this.btnMove.Size = new System.Drawing.Size(148, 35);
             this.btnMove.TabIndex = 26;
-            this.btnMove.Text = "Move!";
+            this.btnMove.Text = "Move";
             this.btnMove.UseVisualStyleBackColor = true;
             this.btnMove.Click += new System.EventHandler(this.btnMove_Click);
             // 

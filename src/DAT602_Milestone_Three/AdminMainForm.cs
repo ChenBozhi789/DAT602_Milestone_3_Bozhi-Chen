@@ -17,7 +17,7 @@ namespace DAT602_MIlestone_Three
             InitializeComponent();
         }
 
-        private void btnAddPlayer_Click(object sender, EventArgs e)
+        private void btnManagePlayer_Click(object sender, EventArgs e)
         {
             AdminManagerForm adminManagerForm = new AdminManagerForm();
             adminManagerForm.ShowDialog();
@@ -25,16 +25,24 @@ namespace DAT602_MIlestone_Three
 
         private void btnEditPlayer_Click(object sender, EventArgs e)
         {
-            AdminManagerForm adminManagerForm = new AdminManagerForm();
-            adminManagerForm.ShowDialog();
+            AdminEditForm adminEditForm = new AdminEditForm();
+            adminEditForm.ShowDialog();
+            this.Close();
         }
 
         private void btnKillRunningGame_Click(object sender, EventArgs e)
         {
             int currentGameID = Convert.ToInt32(txtDeleteGame.Text);
             UserDAO userDAO = new UserDAO();            
-            string deleteMessage = userDAO.KillRunningGame(currentGameID);
-            MessageBox.Show(deleteMessage);
+            bool deleteMessage = userDAO.KillRunningGame(currentGameID);
+            if (deleteMessage)
+            {
+                MessageBox.Show("The running game has been killed");
+            }
+            else
+            {
+                MessageBox.Show("Killing running game fail" + Environment.NewLine + "Reason: The game doesn't exist or already killed");
+            }
         }
     }
 }

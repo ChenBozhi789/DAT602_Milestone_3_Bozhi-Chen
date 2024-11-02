@@ -31,10 +31,10 @@ namespace DAT602_MIlestone_Three
 
             UserDAO userDAO = new UserDAO();
             // call Login function of userDAO
-            int isAuthenticated = userDAO.Login(email, password);
+            int loginResult = userDAO.Login(email, password);
 
             // Respond based on login results
-            if (isAuthenticated > 0)
+            if (loginResult == 1)
             {
                 MessageBox.Show("Login Successfully！");
                 this.Hide();
@@ -42,9 +42,17 @@ namespace DAT602_MIlestone_Three
                 MainGameLobby mainGameLobby = new MainGameLobby();
                 mainGameLobby.ShowDialog();
             }
-            else
+            else if (loginResult == 0)
             {
-                MessageBox.Show("Email of Password incorrect, please try again");
+                MessageBox.Show("\"Invalid credentials! Attempt + 1\"");                
+            }
+            else if (loginResult == -1)
+            {
+                MessageBox.Show("Account is locked, please contact the administrator");
+            }
+            else if (loginResult == -2)
+            {   
+                MessageBox.Show("This account is not exists, Check your enter please");
             }
         }
     }

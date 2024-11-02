@@ -30,81 +30,72 @@
         {
             this.lblAllRegPlayer = new System.Windows.Forms.Label();
             this.lblCurrentgame = new System.Windows.Forms.Label();
-            this.btnDelPlayer = new System.Windows.Forms.Button();
             this.btnEditPlayer = new System.Windows.Forms.Button();
-            this.btnAddPlayer = new System.Windows.Forms.Button();
+            this.btnManagePlayer = new System.Windows.Forms.Button();
             this.btnKillRunningGame = new System.Windows.Forms.Button();
             this.lstAllRegPlayer = new System.Windows.Forms.ListBox();
             this.lstCurrentgame = new System.Windows.Forms.ListBox();
             this.txtDeleteGame = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.txtTargetGame = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblAllRegPlayer
             // 
             this.lblAllRegPlayer.AutoSize = true;
-            this.lblAllRegPlayer.Font = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Bold);
-            this.lblAllRegPlayer.Location = new System.Drawing.Point(362, 26);
+            this.lblAllRegPlayer.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
+            this.lblAllRegPlayer.Location = new System.Drawing.Point(310, 22);
             this.lblAllRegPlayer.Name = "lblAllRegPlayer";
-            this.lblAllRegPlayer.Size = new System.Drawing.Size(240, 20);
+            this.lblAllRegPlayer.Size = new System.Drawing.Size(182, 24);
             this.lblAllRegPlayer.TabIndex = 16;
             this.lblAllRegPlayer.Text = "All Registered Player";
             // 
             // lblCurrentgame
             // 
             this.lblCurrentgame.AutoSize = true;
-            this.lblCurrentgame.Font = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Bold);
-            this.lblCurrentgame.Location = new System.Drawing.Point(36, 27);
+            this.lblCurrentgame.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
+            this.lblCurrentgame.Location = new System.Drawing.Point(36, 22);
             this.lblCurrentgame.Name = "lblCurrentgame";
-            this.lblCurrentgame.Size = new System.Drawing.Size(141, 20);
+            this.lblCurrentgame.Size = new System.Drawing.Size(128, 24);
             this.lblCurrentgame.TabIndex = 15;
             this.lblCurrentgame.Text = "Current Game";
-            // 
-            // btnDelPlayer
-            // 
-            this.btnDelPlayer.AutoSize = true;
-            this.btnDelPlayer.Font = new System.Drawing.Font("Calibri", 14F);
-            this.btnDelPlayer.Location = new System.Drawing.Point(586, 352);
-            this.btnDelPlayer.Name = "btnDelPlayer";
-            this.btnDelPlayer.Size = new System.Drawing.Size(93, 43);
-            this.btnDelPlayer.TabIndex = 14;
-            this.btnDelPlayer.Text = "Delete";
-            this.btnDelPlayer.UseVisualStyleBackColor = true;
             // 
             // btnEditPlayer
             // 
             this.btnEditPlayer.AutoSize = true;
-            this.btnEditPlayer.Font = new System.Drawing.Font("Calibri", 16F);
-            this.btnEditPlayer.Location = new System.Drawing.Point(476, 352);
+            this.btnEditPlayer.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.btnEditPlayer.Font = new System.Drawing.Font("Calibri", 14F);
+            this.btnEditPlayer.Location = new System.Drawing.Point(314, 402);
             this.btnEditPlayer.Name = "btnEditPlayer";
-            this.btnEditPlayer.Size = new System.Drawing.Size(93, 43);
+            this.btnEditPlayer.Size = new System.Drawing.Size(247, 39);
             this.btnEditPlayer.TabIndex = 13;
-            this.btnEditPlayer.Text = "Edit";
-            this.btnEditPlayer.UseVisualStyleBackColor = true;
+            this.btnEditPlayer.Text = "Edit Player";
+            this.btnEditPlayer.UseVisualStyleBackColor = false;
             this.btnEditPlayer.Click += new System.EventHandler(this.btnEditPlayer_Click);
             // 
-            // btnAddPlayer
+            // btnManagePlayer
             // 
-            this.btnAddPlayer.AutoSize = true;
-            this.btnAddPlayer.Font = new System.Drawing.Font("Calibri", 14F);
-            this.btnAddPlayer.Location = new System.Drawing.Point(366, 352);
-            this.btnAddPlayer.Name = "btnAddPlayer";
-            this.btnAddPlayer.Size = new System.Drawing.Size(93, 43);
-            this.btnAddPlayer.TabIndex = 12;
-            this.btnAddPlayer.Text = "Add";
-            this.btnAddPlayer.UseVisualStyleBackColor = true;
-            this.btnAddPlayer.Click += new System.EventHandler(this.btnAddPlayer_Click);
+            this.btnManagePlayer.AutoSize = true;
+            this.btnManagePlayer.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.btnManagePlayer.Font = new System.Drawing.Font("Calibri", 14F);
+            this.btnManagePlayer.Location = new System.Drawing.Point(40, 402);
+            this.btnManagePlayer.Name = "btnManagePlayer";
+            this.btnManagePlayer.Size = new System.Drawing.Size(247, 39);
+            this.btnManagePlayer.TabIndex = 12;
+            this.btnManagePlayer.Text = "Manage Player";
+            this.btnManagePlayer.UseVisualStyleBackColor = false;
+            this.btnManagePlayer.Click += new System.EventHandler(this.btnManagePlayer_Click);
             // 
             // btnKillRunningGame
             // 
             this.btnKillRunningGame.AutoSize = true;
+            this.btnKillRunningGame.BackColor = System.Drawing.SystemColors.ControlLight;
             this.btnKillRunningGame.Font = new System.Drawing.Font("Calibri", 14F);
-            this.btnKillRunningGame.Location = new System.Drawing.Point(106, 352);
+            this.btnKillRunningGame.Location = new System.Drawing.Point(317, 357);
             this.btnKillRunningGame.Name = "btnKillRunningGame";
-            this.btnKillRunningGame.Size = new System.Drawing.Size(203, 43);
+            this.btnKillRunningGame.Size = new System.Drawing.Size(247, 39);
             this.btnKillRunningGame.TabIndex = 11;
             this.btnKillRunningGame.Text = "Kill Running Game";
-            this.btnKillRunningGame.UseVisualStyleBackColor = true;
+            this.btnKillRunningGame.UseVisualStyleBackColor = false;
             this.btnKillRunningGame.Click += new System.EventHandler(this.btnKillRunningGame_Click);
             // 
             // lstAllRegPlayer
@@ -116,9 +107,9 @@
             "Bozhi",
             "Josef",
             "Super"});
-            this.lstAllRegPlayer.Location = new System.Drawing.Point(366, 49);
+            this.lstAllRegPlayer.Location = new System.Drawing.Point(314, 49);
             this.lstAllRegPlayer.Name = "lstAllRegPlayer";
-            this.lstAllRegPlayer.Size = new System.Drawing.Size(313, 268);
+            this.lstAllRegPlayer.Size = new System.Drawing.Size(248, 268);
             this.lstAllRegPlayer.TabIndex = 10;
             // 
             // lstCurrentgame
@@ -133,39 +124,40 @@
             "Game 3v3(1)"});
             this.lstCurrentgame.Location = new System.Drawing.Point(39, 49);
             this.lstCurrentgame.Name = "lstCurrentgame";
-            this.lstCurrentgame.Size = new System.Drawing.Size(305, 268);
+            this.lstCurrentgame.Size = new System.Drawing.Size(248, 268);
             this.lstCurrentgame.TabIndex = 9;
             // 
             // txtDeleteGame
             // 
-            this.txtDeleteGame.Location = new System.Drawing.Point(40, 352);
+            this.txtDeleteGame.Font = new System.Drawing.Font("Calibri", 14F);
+            this.txtDeleteGame.Location = new System.Drawing.Point(39, 357);
             this.txtDeleteGame.Multiline = true;
             this.txtDeleteGame.Name = "txtDeleteGame";
-            this.txtDeleteGame.Size = new System.Drawing.Size(51, 43);
+            this.txtDeleteGame.Size = new System.Drawing.Size(247, 34);
             this.txtDeleteGame.TabIndex = 35;
+            this.txtDeleteGame.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label1
+            // txtTargetGame
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(36, 320);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(275, 24);
-            this.label1.TabIndex = 36;
-            this.label1.Text = "Enter the game you want to kill";
+            this.txtTargetGame.AutoSize = true;
+            this.txtTargetGame.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
+            this.txtTargetGame.Location = new System.Drawing.Point(36, 325);
+            this.txtTargetGame.Name = "txtTargetGame";
+            this.txtTargetGame.Size = new System.Drawing.Size(324, 29);
+            this.txtTargetGame.TabIndex = 36;
+            this.txtTargetGame.Text = "Enter the game you want to kill";
             // 
             // AdminMainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(722, 424);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(603, 468);
+            this.Controls.Add(this.txtTargetGame);
             this.Controls.Add(this.txtDeleteGame);
             this.Controls.Add(this.lblAllRegPlayer);
             this.Controls.Add(this.lblCurrentgame);
-            this.Controls.Add(this.btnDelPlayer);
             this.Controls.Add(this.btnEditPlayer);
-            this.Controls.Add(this.btnAddPlayer);
+            this.Controls.Add(this.btnManagePlayer);
             this.Controls.Add(this.btnKillRunningGame);
             this.Controls.Add(this.lstAllRegPlayer);
             this.Controls.Add(this.lstCurrentgame);
@@ -180,13 +172,12 @@
 
         private System.Windows.Forms.Label lblAllRegPlayer;
         private System.Windows.Forms.Label lblCurrentgame;
-        private System.Windows.Forms.Button btnDelPlayer;
         private System.Windows.Forms.Button btnEditPlayer;
-        private System.Windows.Forms.Button btnAddPlayer;
+        private System.Windows.Forms.Button btnManagePlayer;
         private System.Windows.Forms.Button btnKillRunningGame;
         private System.Windows.Forms.ListBox lstAllRegPlayer;
         private System.Windows.Forms.ListBox lstCurrentgame;
         private System.Windows.Forms.TextBox txtDeleteGame;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label txtTargetGame;
     }
 }

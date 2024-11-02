@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static Mysqlx.Datatypes.Scalar.Types;
 
 namespace DAT602_MIlestone_Three
 {
@@ -20,12 +21,8 @@ namespace DAT602_MIlestone_Three
         private void CreateBoard(int MapID)
         {
             UserDAO userDAO = new UserDAO();
-            Map map = new Map
-            {
-                MapID = MapID
-            };
             
-            List<Tile> tiles = userDAO.GetTiles(map);
+            List<Tile> tiles = userDAO.GetTiles();
 
             foreach (Tile tile in tiles)
             {
@@ -47,7 +44,7 @@ namespace DAT602_MIlestone_Three
                     btn.BackColor = Color.White;
                 }
 
-                // Add event to the button
+                // Add (bind) event to the button
                 btn.Click += (sender, e) => TestedButton_Click(sender, e, tile);
 
                 //Add button to the game board
@@ -61,35 +58,55 @@ namespace DAT602_MIlestone_Three
             // When player click tile, the event will be triggered
             Button clickedButton = sender as Button;
 
-            bool movementResult = userDAO.Player_game_play_movement(GlobalVariable.UserID, tile.TileRow, tile.TileCol);
+            int currentMapID = userDAO.GetCurrentMapID();
+            int currentPlayerID = userDAO.GetCurrentPlayerID();
+            int currentTileID = userDAO.GetCurrentTileID(tile.TileRow, tile.TileCol);
 
+            bool movementResult = userDAO.Player_game_play_movement(currentMapID, currentPlayerID, currentTileID);
+
+            // If the movement is successful, the scoring will be updated
             if (movementResult)
             {
-                if (clickedButton.BackColor == Color.White)
+                int currentItemType = userDAO.Add_item_to_inventory(currentMapID, currentPlayerID, currentTileID);
+                
+                if (currentItemType == 1)
                 {
-                    // Item is diamond
-                    if (tile.ItemTypeID == 1)
-                    {
-                        clickedButton.BackColor = Color.Red;
-                    }
-                    // Item is bomb
-                    else if (tile.ItemTypeID == 2)
-                    {
-                        clickedButton.BackColor = Color.Black;
-                    }
-                    // If the tile is empty, the tile will be changed to gray
-                    else
-                    {
-                        clickedButton.BackColor = Color.Gray;
-                    }
+                    MessageBox.Show("Score + 10");
+                    clickedButton.BackColor = Color.Red;
                 }
-                bool scoringResult = userDAO.game_play_scoring_and_inventory(GlobalVariable.UserID, tile.TileID);
+                else if (currentItemType == 2)
+                {
+                    MessageBox.Show("Score - 5");
+                    clickedButton.BackColor = Color.Black;
+                }
+                else
+                {
+                    clickedButton.BackColor = Color.Gray;
+                    return;
+                }
+                
+            } else
+            {
+                return;
             }
         }
 
-        private void GamePlayForm_Load(object sender, EventArgs e)
+        private void btnMove_Click(object sender, EventArgs e)
         {
-            CreateBoard(GlobalVariable.MapID);
+            int startingTileID = Convert.ToInt16(txtStartingTile.Text);
+            int targetTileID = Convert.ToInt16(txtTargetTile.Text);
+
+            UserDAO userDAO = new UserDAO();
+            bool moveResult = userDAO.move_an_item(GlobalVariable.MapID, startingTileID, targetTileID);
+
+            if (moveResult)
+            {
+                MessageBox.Show("Move successfully");
+            }
+            else
+            {
+                MessageBox.Show("Move failed");
+            }
         }
 
         private void btnBackToPage_Click(object sender, EventArgs e)
@@ -100,22 +117,9 @@ namespace DAT602_MIlestone_Three
             mainGameLobby.ShowDialog();
         }
 
-        private void btnMove_Click(object sender, EventArgs e)
+        private void GamePlayForm_Load(object sender, EventArgs e)
         {
-            GlobalVariable.UserID = 1;
-            int TileID = Convert.ToInt16(txtStartingTile.Text);
-            int targetTileID = Convert.ToInt16(txtTargetTile.Text);
-            UserDAO userDAO = new UserDAO();
-            bool moveResult = userDAO.move_an_item(GlobalVariable.MapID, TileID, targetTileID);
-
-            if (moveResult)
-            {
-                MessageBox.Show("Move successfully");
-            }
-            else
-            {
-                MessageBox.Show("Move failed");
-            }
+            CreateBoard(GlobalVariable.MapID);
         }
     }
 }

@@ -42,7 +42,7 @@
             // 
             // txtPwd
             // 
-            this.txtPwd.Location = new System.Drawing.Point(98, 228);
+            this.txtPwd.Location = new System.Drawing.Point(50, 232);
             this.txtPwd.Multiline = true;
             this.txtPwd.Name = "txtPwd";
             this.txtPwd.PasswordChar = '*';
@@ -51,7 +51,7 @@
             // 
             // txtUsername
             // 
-            this.txtUsername.Location = new System.Drawing.Point(98, 96);
+            this.txtUsername.Location = new System.Drawing.Point(50, 100);
             this.txtUsername.Multiline = true;
             this.txtUsername.Name = "txtUsername";
             this.txtUsername.Size = new System.Drawing.Size(206, 30);
@@ -59,7 +59,7 @@
             // 
             // txtEmail
             // 
-            this.txtEmail.Location = new System.Drawing.Point(98, 162);
+            this.txtEmail.Location = new System.Drawing.Point(50, 166);
             this.txtEmail.Multiline = true;
             this.txtEmail.Name = "txtEmail";
             this.txtEmail.Size = new System.Drawing.Size(206, 30);
@@ -67,7 +67,7 @@
             // 
             // txtRepwd
             // 
-            this.txtRepwd.Location = new System.Drawing.Point(98, 294);
+            this.txtRepwd.Location = new System.Drawing.Point(50, 298);
             this.txtRepwd.Multiline = true;
             this.txtRepwd.Name = "txtRepwd";
             this.txtRepwd.PasswordChar = '*';
@@ -78,7 +78,7 @@
             // 
             this.btnRegister.AutoSize = true;
             this.btnRegister.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Bold);
-            this.btnRegister.Location = new System.Drawing.Point(148, 343);
+            this.btnRegister.Location = new System.Drawing.Point(100, 347);
             this.btnRegister.Name = "btnRegister";
             this.btnRegister.Size = new System.Drawing.Size(112, 38);
             this.btnRegister.TabIndex = 15;
@@ -90,7 +90,7 @@
             // 
             this.lblEmail.AutoSize = true;
             this.lblEmail.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
-            this.lblEmail.Location = new System.Drawing.Point(94, 132);
+            this.lblEmail.Location = new System.Drawing.Point(46, 136);
             this.lblEmail.Name = "lblEmail";
             this.lblEmail.Size = new System.Drawing.Size(69, 29);
             this.lblEmail.TabIndex = 14;
@@ -100,7 +100,7 @@
             // 
             this.lblReenterpwd.AutoSize = true;
             this.lblReenterpwd.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
-            this.lblReenterpwd.Location = new System.Drawing.Point(94, 264);
+            this.lblReenterpwd.Location = new System.Drawing.Point(46, 268);
             this.lblReenterpwd.Name = "lblReenterpwd";
             this.lblReenterpwd.Size = new System.Drawing.Size(203, 29);
             this.lblReenterpwd.TabIndex = 13;
@@ -110,7 +110,7 @@
             // 
             this.lblPassword.AutoSize = true;
             this.lblPassword.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
-            this.lblPassword.Location = new System.Drawing.Point(94, 198);
+            this.lblPassword.Location = new System.Drawing.Point(46, 202);
             this.lblPassword.Name = "lblPassword";
             this.lblPassword.Size = new System.Drawing.Size(111, 29);
             this.lblPassword.TabIndex = 12;
@@ -120,7 +120,7 @@
             // 
             this.lblUsername.AutoSize = true;
             this.lblUsername.Font = new System.Drawing.Font("Calibri", 14F, System.Drawing.FontStyle.Bold);
-            this.lblUsername.Location = new System.Drawing.Point(94, 66);
+            this.lblUsername.Location = new System.Drawing.Point(46, 70);
             this.lblUsername.Name = "lblUsername";
             this.lblUsername.Size = new System.Drawing.Size(117, 29);
             this.lblUsername.TabIndex = 11;
@@ -130,17 +130,17 @@
             // 
             this.lblGamename.AutoSize = true;
             this.lblGamename.Font = new System.Drawing.Font("Calibri", 20F);
-            this.lblGamename.Location = new System.Drawing.Point(22, 22);
+            this.lblGamename.Location = new System.Drawing.Point(43, 18);
             this.lblGamename.Name = "lblGamename";
-            this.lblGamename.Size = new System.Drawing.Size(368, 41);
+            this.lblGamename.Size = new System.Drawing.Size(222, 41);
             this.lblGamename.TabIndex = 10;
-            this.lblGamename.Text = "Treasure Hunt Adventure";
+            this.lblGamename.Text = "Player Register";
             // 
             // RegistrationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(414, 410);
+            this.ClientSize = new System.Drawing.Size(303, 410);
             this.Controls.Add(this.txtPwd);
             this.Controls.Add(this.txtUsername);
             this.Controls.Add(this.txtEmail);

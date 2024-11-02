@@ -101,6 +101,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdminEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AdminEditForm.Designer.cs">
+      <DependentUpon>AdminEditForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AdminMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,7 +141,6 @@
       <DependentUpon>MainGameLobby.cs</DependentUpon>
     </Compile>
     <Compile Include="Map.cs" />
-    <Compile Include="Player.cs" />
     <Compile Include="DatabaseConnection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -146,8 +151,11 @@
       <DependentUpon>RegistrationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Tile.cs" />
-    <Compile Include="User.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="UserDAO.cs" />
+    <EmbeddedResource Include="AdminEditForm.resx">
+      <DependentUpon>AdminEditForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AdminMainForm.resx">
       <DependentUpon>AdminMainForm.cs</DependentUpon>
     </EmbeddedResource>

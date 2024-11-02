@@ -89,11 +89,11 @@
             // 
             this.lblGamename.AutoSize = true;
             this.lblGamename.Font = new System.Drawing.Font("Calibri", 20F);
-            this.lblGamename.Location = new System.Drawing.Point(26, 23);
+            this.lblGamename.Location = new System.Drawing.Point(105, 20);
             this.lblGamename.Name = "lblGamename";
-            this.lblGamename.Size = new System.Drawing.Size(368, 41);
+            this.lblGamename.Size = new System.Drawing.Size(185, 41);
             this.lblGamename.TabIndex = 20;
-            this.lblGamename.Text = "Treasure Hunt Adventure";
+            this.lblGamename.Text = "Player Login";
             // 
             // LoginForm
             // 

@@ -16,7 +16,7 @@ namespace DAT602_MIlestone_Three
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new RegistrationForm());
+            Application.Run(new LoginForm());
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Numerics;
 
 namespace DAT602_MIlestone_Three
 {
@@ -12,7 +13,7 @@ namespace DAT602_MIlestone_Three
     {
         // Connection string to the MySQL database
         // IMPORTANT: Please modify the "Pwd" part to match your database password. Thank you
-        private string connectionString = "Server=localhost; Port=3306; Database=DAT602m2t2db; Uid=root; Pwd=P@ssword1;";
+        private string connectionString = "Server=localhost; Port=3306; Database=TreasureHuntAdventure; Uid=root; Pwd=P@ssword1;";
 
         // 1. Player login, including lock out. [4]
         public int Login(string email, string password)
@@ -25,8 +26,8 @@ namespace DAT602_MIlestone_Three
                     string query = "CALL login(@Email, @Password);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@email", email);
-                        cmd.Parameters.AddWithValue("@password", password);
+                        cmd.Parameters.AddWithValue("@Email", email);
+                        cmd.Parameters.AddWithValue("@Password", password);
 
                         // Return the first column of the first row in the result set
                         object result = cmd.ExecuteScalar();
@@ -34,14 +35,27 @@ namespace DAT602_MIlestone_Three
                         // If result is not null, then return the result, otherwise return 0
                         if (result != null)
                         {
-                            int currentUserID = Convert.ToInt32(result);
-                            GlobalVariable.UserID = currentUserID;
-                            return currentUserID;
+                            string resultMessage = result.ToString();
+
+                            if (resultMessage == "You have Logged in successfully")
+                            {
+                                return 1;
+                            }
+                            else if (resultMessage == "Invalid credentials! Attempt + 1")
+                            {
+                                return 0;
+                            }
+                            else if (resultMessage == "You account has been locked out")
+                            {
+                                return -1;
+                            }
+                            else if (resultMessage == "This Account is not exists")
+                            {
+                                return -2;
+                            }
                         }
-                        else
-                        {
-                            return 0;
-                        }
+                        // Default return value
+                        return 0;
                     }
                 }
                 catch (Exception ex)
@@ -53,7 +67,7 @@ namespace DAT602_MIlestone_Three
         }
 
         // 2. Player registration
-        public bool Register(User user)
+        public bool Register(Player Player)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -61,17 +75,16 @@ namespace DAT602_MIlestone_Three
                 {
                     conn.Open();
                     // Call procedure rather than query
-                    string query = "CALL registration(@Username, @Email, @Password);";
+                    string query = "CALL register(@Username, @Email, @Password);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         // Add parameters to the query
                         // These codes from https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlparametercollection.addwithvalue?view=netframework-4.8.1
-                        cmd.Parameters.AddWithValue("@Username", user.Username);
-                        cmd.Parameters.AddWithValue("@Email", user.Email);
-                        cmd.Parameters.AddWithValue("@Password", user.Password);
+                        cmd.Parameters.AddWithValue("@Username", Player.Username);
+                        cmd.Parameters.AddWithValue("@Email", Player.Email);
+                        cmd.Parameters.AddWithValue("@Password", Player.Password);
                         
                         int result = cmd.ExecuteNonQuery();
-                        Console.WriteLine("You have logged successfully");
                         // Check if the query was successful
                         return result > 0;
                     }
@@ -85,7 +98,7 @@ namespace DAT602_MIlestone_Three
         }
 
         // 3. Laying out tiles on a game board.
-        public int Laying_out_tiles(Map map)
+        public bool Laying_out_tiles(Map map)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -97,84 +110,42 @@ namespace DAT602_MIlestone_Three
                     {
                         cmd.Parameters.AddWithValue("@MaxRow", map.MaxRow);
                         cmd.Parameters.AddWithValue("@MaxCol", map.MaxColumn);
-                        cmd.ExecuteNonQuery();
-                    }
+                        int createBoardResult = cmd.ExecuteNonQuery();
 
-                    // Getting MapID from the last inserted record
-                    string getLastInsertGameID = "SELECT GameID FROM tb_Game ORDER BY GameID DESC LIMIT 1;";
-                    using (MySqlCommand cmd = new MySqlCommand(getLastInsertGameID, conn))
-                    {
-                        object GameID = cmd.ExecuteScalar();
-                        // If MapID is not null, then return true, otherwise return false
-                        if (GameID != null)
+                        // When the board is created successfully
+                        if (createBoardResult > 0)
                         {
-                            int lastGameID = Convert.ToInt32(GameID);
-                            GlobalVariable.GameID = lastGameID;
+                            // Add player to the game
+                            string addPlayerCmd = "CALL add_player_to_game(@GameID, @PlayerID, @TileID);";
+                            using (MySqlCommand executeAddPlayer = new MySqlCommand(addPlayerCmd, conn))
+                            {
+                                executeAddPlayer.Parameters.AddWithValue("@GameID", GetCurrentGameID());
+                                executeAddPlayer.Parameters.AddWithValue("@PlayerID", GetCurrentPlayerID());
+                                executeAddPlayer.Parameters.AddWithValue("@TileID", 1);
+                                executeAddPlayer.ExecuteNonQuery();
+                                //return 1;
+                            }
+
+                            int targetMapID = GetCurrentMapID();
+                            bool addItemResult = Placing_an_item_on_a_tile(targetMapID);
+                            return addItemResult;
                         }
                         else
                         {
-                            MessageBox.Show("Failed to retrieve GameID.");  
-                            return 0;
+                            return false;
                         }
-                    }
-
-                    // Getting MapID from the last inserted record
-                    string getLastInsertMapID = "SELECT MapID FROM tb_Map ORDER BY MapID DESC LIMIT 1;";
-                    using (MySqlCommand cmd = new MySqlCommand(getLastInsertMapID, conn))
-                    {
-                        object MapID = cmd.ExecuteScalar();
-                        // If MapID is not null, then return true, otherwise return false
-                        if (MapID != null)
-                        {
-                            int lastGameID = Convert.ToInt32(MapID);
-                            GlobalVariable.MapID = lastGameID;
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to retrieve MapID.");
-                            return 0;
-                        }
-                    }
-
-                    // Getting UserID from the last inserted record
-                    string getLastInsertUserID = "SELECT UserID FROM tb_user ORDER BY UserID DESC LIMIT 1;";
-                    using (MySqlCommand cmd = new MySqlCommand(getLastInsertUserID, conn))
-                    {
-                        object UserID = cmd.ExecuteScalar();
-                        // If MapID is not null, then return true, otherwise return false
-                        if (UserID != null)
-                        {
-                            int lastUserID = Convert.ToInt32(UserID);
-                            GlobalVariable.UserID = lastUserID;
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to retrieve UserID.");
-                            return 0;
-                        }
-                    }
-
-                    // Add player to the game
-                    string queryTwo = "CALL add_player_to_game(@GameID, @UserID, @TileID);";
-                    using (MySqlCommand cmd = new MySqlCommand(queryTwo, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@GameID", GlobalVariable.GameID);
-                        cmd.Parameters.AddWithValue("@UserID", GlobalVariable.UserID);
-                        cmd.Parameters.AddWithValue("@TileID", 1);
-                        cmd.ExecuteNonQuery();
-                        return 1;
-                    }
+                    }                    
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    return 0;
+                    return false;
                 }
             }
         }
 
         // 4. Placing an item on a tile. [4]
-        public bool Placing_an_item_on_a_tile(Map map)
+        public bool Placing_an_item_on_a_tile(int MapID)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -184,52 +155,33 @@ namespace DAT602_MIlestone_Three
                     string query = "CALL placing_item_on_tile(@MapID);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@MapID", map.MapID);
-                        cmd.ExecuteNonQuery();                        
-                        MessageBox.Show("Ssuccessfully");
-                        return true;
+                        cmd.Parameters.AddWithValue("@MapID", MapID);
+                        int additemResult = cmd.ExecuteNonQuery();
+                        return additemResult > 0;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    MessageBox.Show("Error placing item");
                     return false;
                 }
             }
         }
 
         // 5. Player game play movement
-        public bool Player_game_play_movement(int playerID, int targetTileRow, int targetTileCol)
+        public bool Player_game_play_movement(int GameID, int PlayerID, int TargetTile)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string getLastInsertUserID = "SELECT UserID FROM tb_User ORDER BY UserID DESC LIMIT 1;";
-                    using (MySqlCommand cmd = new MySqlCommand(getLastInsertUserID, conn))
-                    {
-                        object MapID = cmd.ExecuteScalar();
-                        // If MapID is not null, then return true, otherwise return false
-                        if (MapID != null)
-                        {
-                            int lastMapID = Convert.ToInt32(MapID);
-                            GlobalVariable.UserID = lastMapID;
-                        }
-                        else
-                        {
-                            MessageBox.Show("Failed to retrieve UserID.");
-                            return false;
-                        }
-                    }
-
-                    string query = "CALL player_movement(@pPlayerID, @pTileRow, @pTileCol);";
+                    string query = "CALL player_movement(@GameID, @PlayerID, @TargetTile);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@pPlayerID", GlobalVariable.UserID);
-                        cmd.Parameters.AddWithValue("@pTileRow", targetTileRow);
-                        cmd.Parameters.AddWithValue("@pTileCol", targetTileCol);
+                        cmd.Parameters.AddWithValue("@GameID", GameID);
+                        cmd.Parameters.AddWithValue("@PlayerID", PlayerID);
+                        cmd.Parameters.AddWithValue("@TargetTile", TargetTile);
 
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
@@ -238,14 +190,14 @@ namespace DAT602_MIlestone_Three
                             {
                                 // Return result message
                                 string message = reader.GetString(0);
-                                MessageBox.Show(message);
 
-                                if (message == "Player movement successfully!")
+                                if (message == "Player movement successfully")
                                 {
                                     return true;
                                 }
                                 else
                                 {
+                                    MessageBox.Show("Illegal Tile!");
                                     return false;
                                 }
                             } 
@@ -264,73 +216,133 @@ namespace DAT602_MIlestone_Three
             }
         }
 
-        // 6. Game play scoring and 7. Player game play acquiring inventory
-        public bool game_play_scoring_and_inventory(int userID, int targetTile)
+        // 6. Game play scoring.[4]
+        public int Game_play_scoring(int GameID, int PlayerID, int TargetTile)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string query = "CALL game_play_scoring(@UserID, @TargetTile);";
+                    string query = "CALL game_play_scoring(@GameID, @PlayerID, @TargetTile);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@UserID", userID);
-                        cmd.Parameters.AddWithValue("@TargetTile", targetTile);
+                        cmd.Parameters.AddWithValue("@GameID", GameID);
+                        cmd.Parameters.AddWithValue("@PlayerID", PlayerID);
+                        cmd.Parameters.AddWithValue("@TargetTile", TargetTile);
 
-                        // Execute the stored procedure and handle result
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 string resultMessage = reader.GetString(0);
-                                MessageBox.Show(resultMessage);
-                                return true;
+
+                                // Return type of current item
+                                if (resultMessage == "You get the Diamond! Score + 10")
+                                {
+                                    return 1;
+                                }
+                                else if (resultMessage == "You get the Bomb! Score - 5")
+                                {
+                                    return 2;
+                                }
+                                else
+                                {
+                                    return 0;
+                                }
                             }
                             else
                             {
-                                return false;
+                                return -1;
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
-                    return false;
+                    Console.WriteLine(ex.Message);
+                    return -1;
                 }
             }
         }
 
-        // 8. Move an Item (NPC effect)
-        public bool move_an_item(int MapID, int itemID, int targetTileID)
+        // 7. Player game play acquiring inventory
+        public int Add_item_to_inventory(int GameID, int PlayerID, int TargetTile)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string query = "CALL move_an_item(@MapID, @ItemID, @TargetTileID);";
+                    string query = "CALL acquire_item_to_inventory(@GameID, @PlayerID, @TargetTile);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@MapID", GlobalVariable.MapID);
-                        cmd.Parameters.AddWithValue("@ItemID", itemID);
-                        cmd.Parameters.AddWithValue("@TargetTileID", targetTileID);
+                        cmd.Parameters.AddWithValue("@GameID", GameID);
+                        cmd.Parameters.AddWithValue("@PlayerID", PlayerID);
+                        cmd.Parameters.AddWithValue("@TargetTile", TargetTile);
 
-                        // Execute the stored procedure and handle result
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 string resultMessage = reader.GetString(0);
-                                MessageBox.Show(resultMessage);
-                                return true;
+
+                                // Return type of current item
+                                if (resultMessage == "Diamond has been stored in inventory" || resultMessage == "Diamond stock + 1")
+                                {
+                                    return 1;
+                                }
+                                else if (resultMessage == "Bomb has been stored in inventory" || resultMessage == "Bomb stock + 1")
+                                {
+                                    return 2;
+                                }
+                                else
+                                {
+                                    return 0;
+                                }
+                            }
+                            else
+                            {
+                                return -1;
+                            }
+                        }                        
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    return -1;
+                }
+            }
+        }
+
+        // 8. Move an Item (NPC effect)
+        public bool move_an_item(int MapID, int startingtileID, int targetTileID)
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "CALL move_an_item(@MapID, @StartingtileID, @TargetTileID);";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@MapID", 1);
+                        cmd.Parameters.AddWithValue("@StartingtileID", startingtileID);
+                        cmd.Parameters.AddWithValue("@TargetTileID", targetTileID);
+
+                        using(MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                string moveResult = reader.GetString(0);
+                                return moveResult == "Move item successfully";
                             }
                             else
                             {
                                 return false;
                             }
-                        }
+                        }                     
                     }
                 }
                 catch (Exception ex)
@@ -342,44 +354,39 @@ namespace DAT602_MIlestone_Three
         }
 
         // 9. Kill running games
-        public string KillRunningGame(int gameID)
+        public bool KillRunningGame(int gameID)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-
                     // Call the stored procedure
                     string query = "CALL kill_running_game(@pGameID);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@pGameID", gameID);
-
-                        // Execute the procedure and read the returned message
-                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        int killResult = cmd.ExecuteNonQuery();
+                        if (killResult > 0)
                         {
-                            if (reader.Read())
-                            {
-                                return reader.GetString(0); // Return the result message
-                            }
-                            else
-                            {
-                                return "No result returned from the procedure.";
-                            }
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error: " + ex.Message);
-                    return "Error: " + ex.Message;
+                    Console.WriteLine(ex.Message);
+                    return false;
                 }
             }
         }
 
         // 10. Add new players
-        public bool AddPlayer(User user)
+        public bool AddPlayer(Player player)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -392,15 +399,13 @@ namespace DAT602_MIlestone_Three
                     {
                         // Add parameters to the query
                         // These codes from https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlparametercollection.addwithvalue?view=netframework-4.8.1
-                        cmd.Parameters.AddWithValue("@Username", user.Username);
-                        cmd.Parameters.AddWithValue("@Email", user.Email);
-                        cmd.Parameters.AddWithValue("@Password", user.Password);
-                        cmd.Parameters.AddWithValue("@LockState", user.LockState);
-                        cmd.Parameters.AddWithValue("@IsAdministrator", user.IsAdministrator);
+                        cmd.Parameters.AddWithValue("@Username", player.Username);
+                        cmd.Parameters.AddWithValue("@Email", player.Email);
+                        cmd.Parameters.AddWithValue("@Password", player.Password);
+                        cmd.Parameters.AddWithValue("@LockState", player.LockState);
+                        cmd.Parameters.AddWithValue("@IsAdministrator", player.IsAdministrator);
 
                         int result = cmd.ExecuteNonQuery();
-                        Console.WriteLine("You have logged successfully");
-                        // Check if the query was successful
                         return result > 0;
                     }
                 }
@@ -419,7 +424,7 @@ namespace DAT602_MIlestone_Three
                 try
                 {
                     conn.Open();
-                    string query = "SELECT COUNT(*) FROM tb_user WHERE Username = @username;";
+                    string query = "SELECT COUNT(*) FROM tb_Player WHERE Username = @username;";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@username", username);
@@ -436,26 +441,24 @@ namespace DAT602_MIlestone_Three
             }
         }
 
-        public bool UpdatePlayer(User user)
+        public bool UpdatePlayer(Player player)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    string query = "CALL update_player(@pUsername, @Email, @pPassword, @pLockState, @pLoginState, @pGameState, @pIsAdministrator);";
+                    string query = "CALL update_player(@Email, @pUsername , @pPassword, @pLockState, @pIsAdministrator);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@pUsername", user.Username);
-                        cmd.Parameters.AddWithValue("@Email", user.Email);
-                        cmd.Parameters.AddWithValue("@pPassword", user.Password);
-                        cmd.Parameters.AddWithValue("@pLockState", user.LockState);
-                        cmd.Parameters.AddWithValue("@pLoginState", user.LoginState);
-                        cmd.Parameters.AddWithValue("@pGameState", user.GameState);
-                        cmd.Parameters.AddWithValue("@pIsAdministrator", user.IsAdministrator);
+                        cmd.Parameters.AddWithValue("@Email", player.Email);
+                        cmd.Parameters.AddWithValue("@pUsername", player.Username);                        
+                        cmd.Parameters.AddWithValue("@pPassword", player.Password);
+                        cmd.Parameters.AddWithValue("@pLockState", player.LockState);
+                        cmd.Parameters.AddWithValue("@pIsAdministrator", player.IsAdministrator);
 
                         int rowsAffected = cmd.ExecuteNonQuery();
-                        return true;
+                        return rowsAffected > 0;
                     }
                 }
                 catch (Exception ex)
@@ -467,23 +470,21 @@ namespace DAT602_MIlestone_Three
         }
 
         // 12. Delete a player
-        public bool DeletePlayer(User user)
+        public bool DeletePlayer(Player player)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-                    // Call procedure rather than query
                     string query = "CALL delete_player(@Email);";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         // Add parameters to the query
                         // These codes from https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlparametercollection.addwithvalue?view=netframework-4.8.1
-                        cmd.Parameters.AddWithValue("@Email", user.Email);
+                        cmd.Parameters.AddWithValue("@Email", player.Email);
 
                         int result = cmd.ExecuteNonQuery();
-                        Console.WriteLine("Delete user successfully");
                         // Check if the query was successful
                         return result > 0;
                     }
@@ -496,8 +497,131 @@ namespace DAT602_MIlestone_Three
             }
         }
 
+        // This method is used to get the last insert MapID
+        public int GetCurrentGameID()
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT GameID FROM tb_Game ORDER BY GameID DESC LIMIT 1;";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return 0;
+                }
+            }
+        }
+
+        // This method is used to get the last insert MapID
+        public int GetCurrentMapID()
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT MapID FROM tb_Map ORDER BY MapID DESC LIMIT 1;";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return 0;
+                }
+            }
+        }
+
+        // This method is used to get the last insert MapID
+        public int GetCurrentPlayerID()
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT PlayerID FROM tb_Player ORDER BY PlayerID DESC LIMIT 1;";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        object result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            return Convert.ToInt32(result);
+                        }
+                        else
+                        {
+                            return 0;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return 0;
+                }
+            }
+        }
+
+        public int GetCurrentTileID(int TileRow, int TileCol)
+        {
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT TileID FROM tb_Tile WHERE TileRow = @TileRow and TileCol = @TileCol;";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@TileRow", TileRow);
+                        cmd.Parameters.AddWithValue("@TileCol", TileCol);
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return reader.GetInt32("TileID");
+                            }
+                            else
+                            {
+                                return 0;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return 0;
+                }
+            }
+        }
+
         // Getting data from tb_tile and used to create game board
-        public List<Tile> GetTiles(Map map)
+        public List<Tile> GetTiles()
         {
             List<Tile> tiles = new List<Tile>();            
 
@@ -514,7 +638,7 @@ namespace DAT602_MIlestone_Three
                         WHERE t.MapID = @MapID;";
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@MapID", map.MapID);
+                        cmd.Parameters.AddWithValue("@MapID", GetCurrentMapID());
 
                         using (MySqlDataReader reader = cmd.ExecuteReader())
                         {

@@ -17,25 +17,32 @@ namespace DAT602_MIlestone_Three
             InitializeComponent();
         }
 
-        private void btnNewgame1_Click(object sender, EventArgs e)
+        private void btnNewgame_Click(object sender, EventArgs e)
         {
+            UserDAO userDAO = new UserDAO();
+            
             int maxRow = Convert.ToInt32(txtMaxRow.Text);
             int maxCol = Convert.ToInt32(txtMaxCol.Text);
+            // Get the last insert MapID (current MapID)
+            int currentMapID = userDAO.GetCurrentMapID();
 
             Map map = new Map
             {
-                MapID = 0,
+                MapID = currentMapID,
                 MaxRow = maxRow,
                 MaxColumn = maxCol
             };
             
-            UserDAO userDAO = new UserDAO();
+            bool createGameMapID = userDAO.Laying_out_tiles(map);
 
-            int currentMapID = userDAO.Laying_out_tiles(map);
-            if (currentMapID > 0)
+            // IF the Map is created successfully, then place the item on the tile
+            if (createGameMapID)
             {
-                map.MapID = currentMapID;
-                userDAO.Placing_an_item_on_a_tile(map);                
+                MessageBox.Show("Create game map successfully!");
+            } 
+            else
+            {
+                MessageBox.Show("Failed to create the game map!");
             }
             
             this.Hide();

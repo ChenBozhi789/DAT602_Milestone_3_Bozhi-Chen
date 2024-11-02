@@ -40,7 +40,7 @@ namespace DAT602_MIlestone_Three
                 return;
             }
 
-            // Password
+            // Varify Password
             if (txtPwd.Text.Length < 6 || txtPwd.Text.Length > 12)
             {
                 MessageBox.Show("Password length must between 6 to 12 characters");
@@ -57,56 +57,24 @@ namespace DAT602_MIlestone_Three
             // Create a instance of the UserDAO class
             UserDAO userDAO = new UserDAO();
 
-            // Check if username already exists
-            bool usernameExists = userDAO.CheckUsernameExist(username);
-
-            // If the username exists, update the player, otherwise add the player
-            if (usernameExists)
+            Player player = new Player
             {
-                User user = new User
-                {
-                    Username = username,
-                    Email = email,
-                    Password = password,
-                    LockState = lockstate,
-                    LoginState = 0,
-                    GameState = 0,
-                    IsAdministrator = isadministrator
-                };
+                Username = username,
+                Email = email,
+                Password = password,
+                LockState = lockstate,
+                IsAdministrator = isadministrator
+            };
 
-                // Update player if username exists
-                bool isUpdated = userDAO.UpdatePlayer(user);
-
-                if (isUpdated)
-                {
-                    MessageBox.Show("Player updated successfully");
-                }
-                else
-                {
-                    MessageBox.Show("Player updated failed");
-                }
+            // Add player if username does not exist
+            bool isAdded = userDAO.AddPlayer(player);
+            if (isAdded)
+            {
+                MessageBox.Show("Player added successfully");
             }
             else
             {
-                User user = new User
-                {
-                    Username = username,
-                    Email = email,
-                    Password = password,
-                    LockState = lockstate,
-                    IsAdministrator = isadministrator
-                };
-
-                // Add player if username does not exist
-                bool isAdded = userDAO.AddPlayer(user);
-                if (isAdded)
-                {
-                    MessageBox.Show("Player added successfully");
-                }
-                else
-                {
-                    MessageBox.Show("Player added failed");
-                }
+                MessageBox.Show("Player added failed." + Environment.NewLine + "Reason: This player already exists!");
             }
         }
 
@@ -115,27 +83,22 @@ namespace DAT602_MIlestone_Three
             // Get user input from input fields
             string email = txtEmail.Text;
 
-            User user = new User
+            Player player = new Player
             {
                 Email = email
             };
 
             UserDAO userDAO = new UserDAO();
-            bool isDeleted = userDAO.DeletePlayer(user);
+            bool isDeleted = userDAO.DeletePlayer(player);
 
             if (isDeleted)
             {
                 MessageBox.Show("Player delete successfully");
-
-                LoginForm loginForm = new LoginForm();
-                loginForm.ShowDialog();
-
-                //this.Close();
             }
             else
             {
                 MessageBox.Show("Player delete failed");
             }
         }
-    }
+    }    
 }
