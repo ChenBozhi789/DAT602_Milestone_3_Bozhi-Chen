@@ -39,15 +39,14 @@ namespace DAT602_MIlestone_Three
             if (createGameMapID)
             {
                 MessageBox.Show("Create game map successfully!");
+                this.Hide();
+                GamePlayForm gamePlayForm = new GamePlayForm();
+                gamePlayForm.ShowDialog();
             } 
             else
             {
                 MessageBox.Show("Failed to create the game map!");
             }
-            
-            this.Hide();
-            GamePlayForm gamePlayForm = new GamePlayForm();
-            gamePlayForm.ShowDialog();
         }
 
         private void btnAdminconsole_Click(object sender, EventArgs e)

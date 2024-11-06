@@ -27,7 +27,6 @@ namespace DAT602_MIlestone_Three
         {
             AdminEditForm adminEditForm = new AdminEditForm();
             adminEditForm.ShowDialog();
-            this.Close();
         }
 
         private void btnKillRunningGame_Click(object sender, EventArgs e)

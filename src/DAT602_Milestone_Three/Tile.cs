@@ -11,10 +11,8 @@ namespace DAT602_MIlestone_Three
         public int TileID { get; set; }        
         public int TileRow { get; set; }
         public int TileCol { get; set; }
-        public int ItemType { get; set; }
         public bool IsEmptied { get; set; }
         public bool IsOccupied { get; set; }
-        public bool ItemID { get; set; }
         public int ItemTypeID { get; set; }
     }
 }

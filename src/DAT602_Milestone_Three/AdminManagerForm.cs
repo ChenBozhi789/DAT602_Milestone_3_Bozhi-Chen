@@ -97,7 +97,7 @@ namespace DAT602_MIlestone_Three
             }
             else
             {
-                MessageBox.Show("Player delete failed");
+                MessageBox.Show("Player delete failed" + Environment.NewLine + "Reason: This account doesn't exist");
             }
         }
     }    

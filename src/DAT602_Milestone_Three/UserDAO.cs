@@ -29,32 +29,35 @@ namespace DAT602_MIlestone_Three
                         cmd.Parameters.AddWithValue("@Email", email);
                         cmd.Parameters.AddWithValue("@Password", password);
 
-                        // Return the first column of the first row in the result set
-                        object result = cmd.ExecuteScalar();
-
-                        // If result is not null, then return the result, otherwise return 0
-                        if (result != null)
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            string resultMessage = result.ToString();
-
-                            if (resultMessage == "You have Logged in successfully")
+                            if (reader.Read())
                             {
-                                return 1;
+                                // Return result message
+                                string resultMessage = reader.GetString(0);
+
+                                if (resultMessage == "You have Logged in successfully")
+                                {
+                                    return 1;
+                                }
+                                else if (resultMessage == "Invalid credentials! Attempt + 1")
+                                {
+                                    return 0;
+                                }
+                                else if (resultMessage == "Invalid credentials! Account has been locked out")
+                                {
+                                    return -1;
+                                }
+                                else if (resultMessage == "This account does not exist")
+                                {
+                                    return -2;
+                                }
                             }
-                            else if (resultMessage == "Invalid credentials! Attempt + 1")
+                            else
                             {
                                 return 0;
                             }
-                            else if (resultMessage == "You account has been locked out")
-                            {
-                                return -1;
-                            }
-                            else if (resultMessage == "This Account is not exists")
-                            {
-                                return -2;
-                            }
                         }
-                        // Default return value
                         return 0;
                     }
                 }
@@ -84,9 +87,27 @@ namespace DAT602_MIlestone_Three
                         cmd.Parameters.AddWithValue("@Email", Player.Email);
                         cmd.Parameters.AddWithValue("@Password", Player.Password);
                         
-                        int result = cmd.ExecuteNonQuery();
-                        // Check if the query was successful
-                        return result > 0;
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Register successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -110,29 +131,43 @@ namespace DAT602_MIlestone_Three
                     {
                         cmd.Parameters.AddWithValue("@MaxRow", map.MaxRow);
                         cmd.Parameters.AddWithValue("@MaxCol", map.MaxColumn);
-                        int createBoardResult = cmd.ExecuteNonQuery();
 
-                        // When the board is created successfully
-                        if (createBoardResult > 0)
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            // Add player to the game
-                            string addPlayerCmd = "CALL add_player_to_game(@GameID, @PlayerID, @TileID);";
-                            using (MySqlCommand executeAddPlayer = new MySqlCommand(addPlayerCmd, conn))
+                            if (reader.Read())
                             {
-                                executeAddPlayer.Parameters.AddWithValue("@GameID", GetCurrentGameID());
-                                executeAddPlayer.Parameters.AddWithValue("@PlayerID", GetCurrentPlayerID());
-                                executeAddPlayer.Parameters.AddWithValue("@TileID", 1);
-                                executeAddPlayer.ExecuteNonQuery();
-                                //return 1;
-                            }
+                                // Return result message
+                                string message = reader.GetString(0);
 
-                            int targetMapID = GetCurrentMapID();
-                            bool addItemResult = Placing_an_item_on_a_tile(targetMapID);
-                            return addItemResult;
-                        }
-                        else
-                        {
-                            return false;
+                                if (message == "Create game board successfully")
+                                {
+                                    // CLose the previous opened reader. Otherwise, it will cause an error
+                                    reader.Close();
+
+                                    // Add player to the game
+                                    string addPlayerCmd = "CALL add_player_to_game(@GameID, @PlayerID, @TileID);";
+                                    using (MySqlCommand executeAddPlayer = new MySqlCommand(addPlayerCmd, conn))
+                                    {
+                                        executeAddPlayer.Parameters.AddWithValue("@GameID", GetCurrentGameID());
+                                        executeAddPlayer.Parameters.AddWithValue("@PlayerID", GetCurrentPlayerID());
+                                        executeAddPlayer.Parameters.AddWithValue("@TileID", 1);
+                                        executeAddPlayer.ExecuteNonQuery();
+                                    }
+
+                                    int targetMapID = GetCurrentMapID();
+                                    bool addItemResult = Placing_an_item_on_a_tile(targetMapID);
+                                    return addItemResult;
+                                }
+                                // If the message is not "Create game board successfully", then return false
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
                         }
                     }                    
                 }
@@ -156,8 +191,28 @@ namespace DAT602_MIlestone_Three
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@MapID", MapID);
-                        int additemResult = cmd.ExecuteNonQuery();
-                        return additemResult > 0;
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Assign item on tile successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -366,14 +421,27 @@ namespace DAT602_MIlestone_Three
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@pGameID", gameID);
-                        int killResult = cmd.ExecuteNonQuery();
-                        if (killResult > 0)
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Kill running game successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
                         }
                     }
                 }
@@ -405,8 +473,27 @@ namespace DAT602_MIlestone_Three
                         cmd.Parameters.AddWithValue("@LockState", player.LockState);
                         cmd.Parameters.AddWithValue("@IsAdministrator", player.IsAdministrator);
 
-                        int result = cmd.ExecuteNonQuery();
-                        return result > 0;
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Player added successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -416,31 +503,8 @@ namespace DAT602_MIlestone_Three
                 }
             }
         }
+
         // 11. Update data of a player
-        public bool CheckUsernameExist(string username)
-        {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = "SELECT COUNT(*) FROM tb_Player WHERE Username = @username;";
-                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@username", username);
-
-                        int count = Convert.ToInt32(cmd.ExecuteScalar());
-                        return count > 0;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                    return false;
-                }
-            }
-        }
-
         public bool UpdatePlayer(Player player)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -457,8 +521,27 @@ namespace DAT602_MIlestone_Three
                         cmd.Parameters.AddWithValue("@pLockState", player.LockState);
                         cmd.Parameters.AddWithValue("@pIsAdministrator", player.IsAdministrator);
 
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        return rowsAffected > 0;
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Player edited successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -484,9 +567,27 @@ namespace DAT602_MIlestone_Three
                         // These codes from https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlparametercollection.addwithvalue?view=netframework-4.8.1
                         cmd.Parameters.AddWithValue("@Email", player.Email);
 
-                        int result = cmd.ExecuteNonQuery();
-                        // Check if the query was successful
-                        return result > 0;
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Delete player successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
