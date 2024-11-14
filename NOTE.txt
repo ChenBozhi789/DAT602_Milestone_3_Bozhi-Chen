@@ -1,0 +1,37 @@
+Testing data: 
+Bozhi@ok.com
+Tester@qq.com
+xxxx@qq.com
+
+
+-- 1) Test COMMIT
+-- 2) Test ROLLBACK
+-- 3) Test error and exceptions handler
+
+possible situations:
+1. No parameter
+2. Not enough parameter
+3. Parameters exceeded
+4. Wrong parameter type
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Return result message
+                                string message = reader.GetString(0);
+
+                                if (message == "Player added successfully")
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }

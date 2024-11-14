@@ -36,14 +36,14 @@ CREATE TABLE tb_Map (
 
 CREATE TABLE tb_Player (
 	PlayerID INT(10) PRIMARY KEY AUTO_INCREMENT,
-	Username VARCHAR(255),
-	Email VARCHAR(255),
-	Password VARCHAR(255),
-	LockState BIT DEFAULT 0,
-	LoginState BIT DEFAULT 0,
-	GameState BIT DEFAULT 0,
-	IsAdministrator BIT DEFAULT 0,
-	Attempt INT DEFAULT 0
+	Username VARCHAR(255)  NOT NULL,
+	Email VARCHAR(255) NOT NULL,
+	Password VARCHAR(255) NOT NULL,
+	LockState BIT  NOT NULL DEFAULT 0,
+	LoginState BIT  NOT NULL DEFAULT 0,
+	GameState BIT  NOT NULL DEFAULT 0,
+	IsAdministrator BIT  NOT NULL DEFAULT 0,
+	Attempt INT  NOT NULL DEFAULT 0
 );
 
 CREATE TABLE tb_Tile (
@@ -114,90 +114,150 @@ CREATE TABLE tb_Chat_Player (
 -- 1. Player login, including lock out. [4]
 DROP PROCEDURE IF EXISTS login;
 DELIMITER //
-CREATE PROCEDURE login(IN pEmail VARCHAR(255), IN pPassword VARCHAR(255))
+CREATE PROCEDURE login(
+	IN pEmail VARCHAR(255), 
+    IN pPassword VARCHAR(255)
+)
 main_code: BEGIN
+	-- For MySQL error and exceptions handling facilities, I got idea from here: 
+	-- https://docs.percona.com/percona-server/8.4/stored-procedure-error-handling.html#disadvantages-of-using-error-handling
+	-- Error and exception handling facilities
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+	-- I got SIGNAL from here: https://www.mysqltutorial.org/mysql-stored-procedure/mysql-signal/
+	IF pEmail IS NULL OR pPassword IS NULL
+    THEN 
+		SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+
+	START TRANSACTION;
+    
 	-- Check if player exists
     IF NOT EXISTS (SELECT 1 FROM tb_Player p WHERE Email = pEmail)
     THEN
+		ROLLBACK;
 		SELECT 'This account does not exist' AS Message;
         LEAVE main_code;
 	END IF;
-    
-    -- Check if player is locked
-    IF EXISTS (SELECT 1 FROM tb_Player p WHERE p.Attempt >= 5 AND Email = pEmail)
-    THEN
-		UPDATE tb_Player
-		SET LockState = 1
-		WHERE Email = pEmail;
-		SELECT 'Your account has been locked out' AS Message;
-        LEAVE main_code;
-	END IF;
-    
+	
 	-- Check if login credentials is valid
-    IF EXISTS (SELECT 1 FROM tb_Player p WHERE Email = pEmail AND Password = pPassword)
+    -- When login credentials are valid
+    IF EXISTS (SELECT 1 FROM tb_Player WHERE Email = pEmail AND Password = pPassword)
     THEN
 		-- Valid credentials
 		UPDATE tb_Player
-		SET Attempt = 0, LoginState = 1
-		WHERE Email = pEmail;                
-		SELECT 'You have Logged in successfully' AS Message;		
-	ELSE
-		-- Invalid credentials
-        UPDATE tb_Player
-		SET Attempt = Attempt + 1
+		SET LoginState = 1, Attempt = 0
 		WHERE Email = pEmail;
-		SELECT 'Invalid credentials! Attempt + 1' AS Message;
+		SELECT 'You have Logged in successfully' AS Message;
+	ELSE        
+        -- Check if attempt is greater than or equal to 5
+        IF (SELECT Attempt FROM tb_Player WHERE Email = pEmail) < 5
+        THEN
+			UPDATE tb_Player
+			SET Attempt = Attempt + 1
+			WHERE Email = pEmail;            
+            SELECT 'Invalid credentials! Attempt + 1' AS Message;			
+		ELSE
+			UPDATE tb_Player
+            SET LockState = 1
+            WHERE Email = pEmail;
+			SELECT 'Invalid credentials! Account has been locked out' AS Message;
+		END IF;
 	END IF;
+    COMMIT;
 END//
-DELIMITER ;
+DELIMITER ;	
 
 -- 2. Player registration,[4]
 DROP PROCEDURE IF EXISTS register;
 DELIMITER //
-CREATE PROCEDURE register(IN pUsername VARCHAR(255), IN pEmail VARCHAR(255), IN pPassword VARCHAR(255))
+CREATE PROCEDURE register(
+	IN pUsername VARCHAR(255), 
+    IN pEmail VARCHAR(255), 
+    IN pPassword VARCHAR(255)
+)
 BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+	START TRANSACTION;
+    
 	-- If account already exist in database
-	IF EXISTS (SELECT `Email` FROM tb_Player p WHERE p.Email = pEmail)
-	THEN 
-		SELECT 'Register failed! This account alreadt exists' AS Message;    
+	IF EXISTS (SELECT 1 FROM tb_Player p WHERE p.Email = pEmail)
+	THEN
+		ROLLBACK;
+		SELECT 'Register failed! This account alreadt exists' AS Message;		
 	-- Register successfully
-	ELSE
+	ELSE		
 		INSERT INTO tb_Player (`Username`, `Email`, `Password`) VALUES (pUsername, pEmail, pPassword);
+        SELECT 'Register successfully' AS Message;
 	END IF;
+    COMMIT;
 END//
 DELIMITER ;
 
 -- 3. Laying out tiles on a game board. [4]
 DROP PROCEDURE IF EXISTS make_a_board;
 DELIMITER //
-CREATE PROCEDURE make_a_board(IN pMaxRow INT, IN pMaxCol INT)
-BEGIN	
-    DECLARE new_game_id INT;
+CREATE PROCEDURE make_a_board(
+	IN pMaxRow INT, 
+    IN pMaxCol INT
+)
+BEGIN
+	DECLARE new_game_id INT;
 	DECLARE new_map_id INT;
     DECLARE current_row INT DEFAULT 0;
     DECLARE current_col INT DEFAULT 0;
     
-    INSERT INTO tb_game (StartTime, EndTIme) VALUES (current_timestamp, DATE_ADD(current_timestamp, INTERVAL 1 DAY));
-    -- Get the GameID from the last insert
-    SET new_game_id = LAST_INSERT_ID();
-
-	INSERT INTO tb_Map (GameID, MaxRow, MaxColumn) VALUES (new_game_id, pMaxRow, pMaxCol);
-    -- Get the MapID from the last insert
-	SET new_map_id = LAST_INSERT_ID();
-	SET new_map_id = LAST_INSERT_ID();
+    DECLARE exit handler FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
     
-    -- Use WHILE loop to traverse each row and col
-    WHILE current_row < pMaxRow DO
-		WHILE current_col < pMaxCol DO
-            -- Insert data into tb_Tile
-            INSERT INTO tb_Tile (MapID, TileROW, TileCol, IsEmptied) VALUES (new_map_id, current_row, current_col, 1);
-            SET current_col = current_col + 1;            
+    IF pMaxRow IS NULL OR pMaxCol IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+    
+	START TRANSACTION;
+	
+    IF (pMaxRow > 0 AND pMaxRow < 10) AND (pMaxCol > 0 AND pMaxCol < 10)
+    THEN
+		INSERT INTO tb_game (StartTime, EndTIme) VALUES (current_timestamp, DATE_ADD(current_timestamp, INTERVAL 1 DAY));
+		-- Get the GameID from the last insert
+		SET new_game_id = LAST_INSERT_ID();
+
+		INSERT INTO tb_Map (GameID, MaxRow, MaxColumn) VALUES (new_game_id, pMaxRow, pMaxCol);
+		-- Get the MapID from the last insert
+		SET new_map_id = LAST_INSERT_ID();
+    
+		-- Use WHILE loop to traverse each row and col
+		WHILE current_row < pMaxRow DO
+			WHILE current_col < pMaxCol DO
+				-- Insert data into tb_Tile
+				INSERT INTO tb_Tile (MapID, TileROW, TileCol, IsEmptied) VALUES (new_map_id, current_row, current_col, 1);
+				SET current_col = current_col + 1;            
+			END WHILE;
+			-- Initial current_col and plus current_row
+			SET current_col = 0;
+			SET current_row = current_row + 1;
 		END WHILE;
-        -- Initial current_col and plus current_row
-        SET current_col = 0;
-		SET current_row = current_row + 1;
-	END WHILE;
-	-- SELECT 'Add tile successfully!' AS Message;
+        COMMIT;
+        SELECT 'Create game board successfully' AS Message;
+	ELSE
+		ROLLBACK;
+        SELECT 'Please enter valid size of game board' AS Message;
+	END IF;    
 END//
 DELIMITER ;
 
@@ -225,14 +285,28 @@ DROP PROCEDURE IF EXISTS placing_item_on_tile;
 DELIMITER //
 CREATE PROCEDURE placing_item_on_tile(IN pMapID INT)
 BEGIN
-    DECLARE total_row INT;
+	DECLARE total_row INT;
     DECLARE total_col INT;
     DECLARE current_row INT DEFAULT 0;
     DECLARE current_col INT DEFAULT 0;
 	DECLARE item_type INT DEFAULT 0;
     DECLARE temp_tile_id INT;
     DECLARE temp_item_id INT;
-	
+    
+	DECLARE exit handler FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+    IF pMapID IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+    
+	START TRANSACTION;
+    
     -- Insert data into tb_ItemType
     IF NOT EXISTS (SELECT * FROM tb_ItemType)
     THEN		
@@ -251,7 +325,7 @@ BEGIN
 		-- Traverse the whole board
 		WHILE current_row <= total_row DO
 			WHILE current_col <= total_col DO
-				-- Get current TileID (Temporary)
+				-- Get current TileID
 				SELECT TileID INTO temp_tile_id
 				FROM tb_tile
 				WHERE MapID = pMapID AND
@@ -297,7 +371,10 @@ BEGIN
 			SET current_col = 0;
 			SET current_row = current_row + 1;
 		END WHILE;
+        COMMIT;
+        SELECT 'Assign item on tile successfully' AS Message;
 	ELSE
+		ROLLBACK;
 		SELECT 'Invalid MapID, please check again!' AS Message;
     END IF;
 END//
@@ -306,18 +383,34 @@ DELIMITER ;
 -- 5. Player game play movement [4]
 DROP PROCEDURE IF EXISTS player_movement;
 DELIMITER //
-CREATE PROCEDURE player_movement(IN pGameID INT, IN pPlayerID INT, IN pTargetID INT)
+CREATE PROCEDURE player_movement(
+	IN pGameID INT, 
+	IN pPlayerID INT, 
+	IN pTargetID INT
+)
 BEGIN
 	DECLARE current_tile_id INT;
     DECLARE current_tile_row INT;
     DECLARE current_tile_col INT;
     DECLARE current_tile_state INT;
-    
     DECLARE target_tile_row INT;
     DECLARE target_tile_col INT;
     DECLARE target_tile_state BIT;
 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+    IF pGameID IS NULL OR pPlayerID IS NULL OR pTargetID IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+
 	START TRANSACTION;
+    
     -- Get current tile info (from tb_Game_Tile)
     SELECT gp.TileID, t.TileRow, t.TileCol, t.IsOccupied into current_tile_id, current_tile_row, current_tile_col, current_tile_state
     FROM tb_game_player gp
@@ -353,8 +446,8 @@ BEGIN
 		COMMIT;
         SELECT "Player movement successfully" AS Message;
 	ELSE
-		SELECT "Player movement fail" AS Message;
-        ROLLBACK;    
+		ROLLBACK;
+		SELECT "Player movement fail" AS Message;        
     END IF;
 END//
 DELIMITER ;
@@ -362,10 +455,26 @@ DELIMITER ;
 -- 6. Game play scoring. How do players gain and lose points? [4]
 DROP PROCEDURE IF EXISTS game_play_scoring;
 DELIMITER //
-CREATE PROCEDURE game_play_scoring(IN pGameID INT, IN pPlayerID INT, IN pTargetID INT)
+CREATE PROCEDURE game_play_scoring(
+	IN pGameID INT, 
+	IN pPlayerID INT, 
+	IN pTargetID INT
+)
 BEGIN
     DECLARE current_item_id INT;
     DECLARE current_item_type INT;
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+    IF pGameID IS NULL OR pPlayerID IS NULL OR pTargetID IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
 
 	START TRANSACTION;
 	-- Check if tile is emptied
@@ -411,7 +520,7 @@ BEGIN
 		END IF;
 		COMMIT;
 	ELSE
-        ROLLBACK;    
+        ROLLBACK;   
     END IF;
 END//
 DELIMITER ;
@@ -419,10 +528,26 @@ DELIMITER ;
 -- 7. Player game play acquiring inventory
 DROP PROCEDURE IF EXISTS acquire_item_to_inventory;
 DELIMITER //
-CREATE PROCEDURE acquire_item_to_inventory(IN pGameID INT, IN pPlayerID INT, IN pTargetID INT)
+CREATE PROCEDURE acquire_item_to_inventory(
+	IN pGameID INT, 
+	IN pPlayerID INT, 
+	IN pTargetID INT
+)
 BEGIN
     DECLARE current_item_id INT;    
     DECLARE current_item_type INT;
+
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+    IF pGameID IS NULL OR pPlayerID IS NULL OR pTargetID IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
 
 	START TRANSACTION;
 	-- Check if tile is emptied
@@ -495,21 +620,37 @@ BEGIN
 				END IF;                
 			END IF;
 		END IF;
-		COMMIT;
+        COMMIT;
 	ELSE
-        ROLLBACK;    
-    END IF;
+        ROLLBACK;
+    END IF;    
 END//
 DELIMITER ;
 
 -- 8. Move an Item (NPC effect). [4]
 DROP PROCEDURE IF EXISTS move_an_item;
 DELIMITER //
-CREATE PROCEDURE move_an_item(IN pMapID INT, IN pTileID INT, IN pTargetTileID INT)
+CREATE PROCEDURE move_an_item(
+	IN pMapID INT, 
+	IN pTileID INT, 
+	IN pTargetTileID INT
+)
 BEGIN
 	DECLARE current_tile_emptied_state INT;
     DECLARE current_tile_item INT;
 	DECLARE target_tile_emptied_state INT;
+    
+	DECLARE exit handler FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+    IF pMapID IS NULL OR pTileID IS NULL OR pTargetTileID IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
 
 	START TRANSACTION;
 	-- Get current tile IsEmptied state
@@ -533,7 +674,6 @@ BEGIN
         SET IsEmptied = 1
 		WHERE TileID = pTileID;
     
-		-- Update target tile state
 		UPDATE tb_Tile
         SET IsEmptied = 0
 		WHERE TileID = pTargetTileID;
@@ -544,8 +684,8 @@ BEGIN
         COMMIT;
         SELECT "Move item successfully" AS Message;
 	ELSE
-		SELECT "The target tile is illegal" AS Message;
-        ROLLBACK;
+		ROLLBACK;
+		SELECT "The target tile is illegal" AS Message;        
     END IF;
 END//
 DELIMITER ;
@@ -555,12 +695,29 @@ DROP PROCEDURE IF EXISTS kill_running_game;
 DELIMITER //
 CREATE PROCEDURE kill_running_game(IN pGameID INT)
 BEGIN 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+    
+    IF pGameID IS NULL
+    THEN
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+
+	START TRANSACTION;
+    
 	IF EXISTS (SELECT 1 FROM tb_Game WHERE GameID = pGameID AND State = 'Running')
     THEN
 		UPDATE tb_Game
 		SET State = 'Terminated'
 		WHERE GameID = pGameID;
+        COMMIT;
+        SELECT 'Kill running game successfully' AS Message;
 	ELSE
+		ROLLBACK;
 		SELECT 'Kill running game fail' AS Message;
     END IF;
 END//
@@ -576,12 +733,27 @@ CREATE PROCEDURE add_player(
     IN pLockState BIT,
     IN pIsAdministrator BIT)
 BEGIN 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+
+    IF pUsername IS NULL OR pEmail IS NULL OR pPassword IS NULL OR pLockState IS NULL OR pIsAdministrator IS NULL THEN
+		SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+
+	START TRANSACTION;
+    
 	IF NOT EXISTS (SELECT 1 FROM tb_Player WHERE Email = pEmail)
 	THEN
 		-- Add new player
 		INSERT INTO tb_Player (Username, Email, Password, LockState, IsAdministrator) VALUES (pUsername, pEmail, pPassword, pLockState, pIsAdministrator);
-        -- SELECT 'Add player successfully' AS Message;
+        COMMIT;
+        SELECT 'Player added successfully' AS Message;
 	ELSE
+		ROLLBACK;
 		SELECT 'This player already exisits' AS Message;
 	END IF;
 END//
@@ -598,6 +770,20 @@ CREATE PROCEDURE update_player(
     IN pIsAdministrator BIT
 )
 BEGIN 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+    
+	IF pEmail IS NULL OR pUsername IS NULL OR pPassword IS NULL OR pLockState IS NULL OR pIsAdministrator IS NULL
+    THEN 
+		SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+    
+    START TRANSACTION;
+    
 	IF EXISTS (SELECT 1 FROM tb_Player WHERE Email = pEmail)
 	THEN
 		UPDATE tb_Player
@@ -608,7 +794,10 @@ BEGIN
 			IsAdministrator = pIsAdministrator
 		WHERE
 			Email = pEmail;
+		COMMIT;        
+        SELECT 'Player edited successfully' AS Message;
 	ELSE
+		ROLLBACK;
         SELECT 'This player does not exist' AS Message;
 	END IF;
 END//
@@ -619,10 +808,27 @@ DROP PROCEDURE IF EXISTS delete_player;
 DELIMITER //
 CREATE PROCEDURE delete_player(IN pEmail VARCHAR(255))
 BEGIN 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SELECT "An error occured" AS Message;
+	END;
+    
+	IF pEmail IS NULL
+    THEN 
+		SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Please pass all required parameters';
+	END IF;
+    
+    START TRANSACTION;
+    
 	IF EXISTS (SELECT 1 FROM tb_Player WHERE Email = pEmail)
 	THEN
 		DELETE FROM tb_Player WHERE Email = pEmail;
+        COMMIT;
+        SELECT 'Delete player successfully' AS Message;
 	ELSE
+		ROLLBACK;
         SELECT 'This player does not exists' AS Message;
 	END IF;
 END//
@@ -631,7 +837,11 @@ DELIMITER ;
 -- Add player to exist game map
 DROP PROCEDURE IF EXISTS add_player_to_game;
 DELIMITER //
-CREATE PROCEDURE add_player_to_game(IN pGameID INT, IN pPlayerID INT, IN pTileID INT)
+CREATE PROCEDURE add_player_to_game(
+	IN pGameID INT, 
+	IN pPlayerID INT, 
+	IN pTileID INT
+)
 code_block: BEGIN
 	START TRANSACTION;
     
@@ -665,95 +875,3 @@ code_block: BEGIN
         COMMIT;
     END IF;
 END//
-
--- 2. Player registration,[4]
--- 1) Register account successfully
-CALL register('Bozhi Chen', 'bozhi.chen@example.com', '112233');
-CALL register('TESTER', 'TESTER@example.com', '666666');
-CALL register('LOCK', 'LOCK@LOCK.com', 'aabbcc');
--- 2) Register account fail
-CALL register('Bozhi Chen', 'bozhi.chen@example.com', '112233');
-
--- 1. Player login, including lock out. [4]
--- 1) Login successfully
-CALL login('bozhi.chen@example.com', '112233');
--- 2) Login fail (attempt + 1)
-CALL login('TESTER@example.com', 'djhedjcvy');
-CALL login('TESTER@example.com', 'djhedjcvy');
--- 3) Account locked out
-CALL login('LOCK@LOCK.com', 'xxxxx');
-CALL login('LOCK@LOCK.com', 'xxxxx');
-CALL login('LOCK@LOCK.com', 'xxxxx');
-CALL login('LOCK@LOCK.com', 'xxxxx');
-CALL login('LOCK@LOCK.com', 'xxxxx');
-CALL login('LOCK@LOCK.com', 'xxxxx');
-
--- 3. Laying out tiles on a game board. [4]
-CALL make_a_board(5, 5);
-
--- 4. Placing an item on a tile. [4]
-CALL placing_item_on_tile(1);
-
--- Add player to game
-CALL add_player_to_game(1, 1, 1);
-
--- 5. Player game play movement, i.e., moving a player to a “legal” tile. [4]
--- 1) Play movement successful
-CALL player_movement(1, 1, 2);
--- 2) Play movement fail
-CALL player_movement(1, 1, 99);
-CALL player_movement(1, 99, 3);
-CALL player_movement(99, 1, 3);
-
--- 6. Game play scoring. How do players gain and lose points? [4]
--- 1) Game play scoring successful
-CALL game_play_scoring(1, 1, 3);
-CALL game_play_scoring(1, 1, 4);
-CALL game_play_scoring(1, 1, 5);
--- 2) Game play scoring fail
-CALL game_play_scoring(99, 1, 888);
-CALL game_play_scoring(1, 1, 99);
-
--- 7. Player game play acquiring inventory, e.g., picking up items off a tile and putting them in an inventory (bag?) [4]
--- 1) Item added to inventory successfully
-CALL acquire_item_to_inventory(1, 1, 6);
-CALL acquire_item_to_inventory(1, 1, 7);
-CALL acquire_item_to_inventory(1, 1, 8);
--- 2) Item added to inventory failure
-CALL acquire_item_to_inventory(99, 1, 999);
-CALL acquire_item_to_inventory(1, 1, 999);
-
--- 8. Move an Item (NPC effect). [4]
-/*
-NOTE: 
-For this procedure, you may need to according tb_tile and execute it.
-(pTileID is the tile you want to move the item to, pTargetTileID is the destination tile)
-Thank you.	
-*/
--- Foramt: move_an_item(IN pMapID INT, IN pTileID INT, IN pTargetTileID INT)
--- 1) Mve an item successfully
-CALL move_an_item(1, 1, 2);
--- 2) Mve an item failure
-CALL move_an_item(1, 1, 99);
-CALL move_an_item(1, 99, 1);
-
--- 9. Kill running games. [4]
-CALL kill_running_game(1);
-
--- 10. Add new players. [4]
--- 	1) Add new player successfully
-CALL add_player('BATMAN', 'BATMAN@qq.com', '111@qq.com', 0, 0);
--- 	2) Add new player failure
-CALL add_player('Bozhi Chen', 'bozhi.chen@example.com', '112233', 0, 0);
-
--- 11. Update data of a player. [4]
--- 1) Update data of a player successfully
-CALL update_player('bozhi.chen@example.com', 'UPDATEDEMAIL', 'UPDATEDPWD', 1, 1);
--- 2) Update data of a player failure
-CALL update_player('THISINVALID@qq.com', 'UPDATEDEMAIL', 'UPDATEDPWD', 1, 1);
-
--- 12. Delete a player. [4]
--- 1) Delete a player successfully
-CALL delete_player("TESTER@example.com");
--- 2) Delete a player failure
-CALL delete_player("AABBCC@example.com");
